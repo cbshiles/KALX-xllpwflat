@@ -1,27 +1,19 @@
 // cash_deposit.cpp - cash deposit
 // Copyright (c) 2011 KALX, LLC. All rights reserved. No warranty made.
 #include "xllpwflat.h"
-#include "../xlldatetime/xlldatetime.h"
+#include "../fmsdatetime/calendar.h"
 #include "../fmspwflat/cash_deposit.h"
 
-using namespace fixed_income;
+using namespace instrument;
 using namespace xll;
 
 static AddInX xai_cash_deposit(
-	FunctionX(XLL_HANDLEX, _T("?xll_cash_deposit"), FI_PREFIX _T("INSTRUMENT.CASH.DEPOSIT"))
-	.Arg(XLL_LPOPERX, _T("Settle"), _T("is the number of days required to settle the cash deposit."),
-		2)
-	.Arg(XLL_LONGX, _T("Count"), IS_COUNT,
-		3)
-	.Arg(XLL_LONGX, _T("Unit"), IS_UNIT,
-		_T("=UNIT_MONTHS()"))
-	.Arg(XLL_LONGX, _T("Dcb"), IS_DCB,
-		_T("=DCB_ACTUAL_360()"))
-	.Arg(XLL_LONGX, _T("Roll"), IS_ROLL,
-		_T("=ROLL_MODIFIED_FOLLOWING()"))
-	.Arg(XLL_HANDLEX, _T("Calendar"), IS_CAL _T(" "),
-		_T("=CALENDAR_NYB"))
-	.Uncalced()
+	FunctionX(XLL_HANDLEX XLL_UNCALCEDX, _T("?xll_cash_deposit"), _T("CASH.DEPOSIT"))
+	.Arg(XLL_LPOPERX, _T("Count"), IS_COUNT)
+	.Arg(XLL_LONGX, _T("Unit"), IS_UNIT)
+	.Arg(XLL_LONGX, _T("Dcb"), IS_DCB)
+	.Arg(XLL_LONGX, _T("Roll"), IS_ROLL)
+	.Arg(XLL_HANDLEX, _T("Calendar"), IS_CALENDAR _T(" "))
 	.Category(CATEGORY)
 	.FunctionHelp(_T("Returns the handle to a cash deposit."))
 	.Documentation(
@@ -29,22 +21,25 @@ static AddInX xai_cash_deposit(
 	)
 );
 HANDLEX WINAPI
-xll_cash_deposit(LPOPERX set, int count, time_unit unit, day_count_basis dcb, roll_convention roll, HANDLEX cal)
+xll_cash_deposit(LPOPERX count, time_unit unit, day_count_basis dcb, roll_convention roll, HANDLEX cal)
 {
 #pragma XLLEXPORT
-	HANDLEX h(0);
+	handle<fixed_income_instrument> h;
 
 	try {
-		ensure (size<XLOPERX>(*set) == 1 || size<XLOPERX>(*set) == 6);
+		ensure (size<XLOPERX>(*count) == 1 || size<XLOPERX>(*count) == 5);
 
-		if (size<XLOPERX>(*set) == 6) {
-			count= static_cast<int>((*set)[1]);
-			unit = static_cast<time_unit>(static_cast<int>((*set)[2]));
-		    dcb = static_cast<day_count_basis>(static_cast<int>((*set)[3]));
-			roll = static_cast<roll_convention>(static_cast<int>((*set)[4]));
-			cal = (*set)[5];
+		holiday_calendar cal_;
+
+		if (size<XLOPERX>(*count) == 5) {
+			unit = static_cast<time_unit>(static_cast<int>((*count)[1]));
+		    dcb = static_cast<day_count_basis>(static_cast<int>((*count)[2]));
+			roll = static_cast<roll_convention>(static_cast<int>((*count)[3]));
+			handle<FPX> h_(static_cast<HANDLEX>((*count)[4]));
+			if (h_)
+				cal_ = holiday_calendar(h_->size(), h_->array());
 		}
-/*		else if (size<XLOPERX>(*count) == 1) {
+		else if (size<XLOPERX>(*count) == 1) {
 			if (count->xltype == xltypeStr) {
 				// ticker?
 				LOPERX xEval;
@@ -56,16 +51,50 @@ xll_cash_deposit(LPOPERX set, int count, time_unit unit, day_count_basis dcb, ro
 			if (h_)
 				cal_ = holiday_calendar(h_->size(), h_->array());
 		}
-*/		handle<instrument<double,datetime::date>> hcd(new cash_deposit<>(static_cast<int>((*set)[0]), count, unit, dcb, roll, HOLIDAY_CALENDAR(cal)));
 
-		h = hcd.get();
+		h = new cash_deposit(static_cast<int>((*count)[0]), unit, dcb, roll, cal_);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
+
+		return 0;
+	}
+
+	return h.get();
+}
+
+static AddInX xai_cash_deposit_valuation(
+	FunctionX(XLL_HANDLEX, _T("?xll_cash_deposit_valuation"), _T("CASH.DEPOSIT.VALUATION"))
+	.Arg(XLL_HANDLEX, _T("Handle"), _T("is a handle to a cash deposit"))
+	.Arg(XLL_DOUBLEX, _T("Settlement"), IS_SETTLEMENT)
+	.Arg(XLL_DOUBLEX, _T("Effective"), IS_EFFECTIVE)
+	.Arg(XLL_DOUBLEX, _T("Rate"), IS_RATE _T(" "))
+	.Category(CATEGORY)
+	.FunctionHelp(_T("Calculate cash flows and return the handle of the cash deposit."))
+	.Documentation(
+		_T("Typically the settlement date equals the effective date for cash deposits. ")
+	)
+);
+HANDLEX WINAPI
+xll_cash_deposit_valuation(HANDLEX h, double set, double eff, double rate)
+{
+#pragma XLLEXPORT
+	try {
+		cash_deposit *pcd(0);
+
+		ensure (0 != (pcd = dynamic_cast<cash_deposit*>(handle<fixed_income_instrument>(h).ptr())));
+
+		pcd->valuation(date(set), date(eff), rate);
+	}
+	catch (const std::exception& ex) {
+		XLL_ERROR(ex.what());
+
+		return 0;
 	}
 
 	return h;
 }
+
 
 #ifdef _DEBUG
 
@@ -73,7 +102,7 @@ int
 test_cash_deposit(void)
 {
 	try {
-		cash_deposit<> cd0(2, 1, UNIT_WEEK, DCB_ACTUAL_360, ROLL_MODIFIED_FOLLOWING, CALENDAR_NONE);
+		cash_deposit cd0(1, UNIT_WEEK, DCB_ACTUAL_360, ROLL_MODIFIED_FOLLOWING, CALENDAR_NONE);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -84,4 +113,5 @@ test_cash_deposit(void)
 	return 1;
 }
 static Auto<OpenAfter> xao_cash_deposit(test_cash_deposit);
+
 #endif // _DEBUG

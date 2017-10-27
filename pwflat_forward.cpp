@@ -1,69 +1,39 @@
- // pwflat_forward.cpp - Piecewise flat forward curve.
+// pwflat_forward.cpp - bootstrap piecewise flat yield curve
 #include "xllpwflat.h"
-#include "../fmspwflat/pwflat.h"
+#include "../fmspwflat/instrument.h"
 
 using namespace xll;
 using namespace pwflat;
 
-class pwflat_forward : public forward_curve<> {
-	std::vector<double> t_, f_;
-public:
-	pwflat_forward(double _f = 0)
-		: forward_curve(_f)
-	{ }
-	pwflat_forward(size_t n, const double* t, const double* f, double _f_ = 0)
-		: t_(t, t + n), f_(f, f + n)
-	{
-		set(n, &t_[0], &f_[0], _f_);
-	}
-	pwflat_forward(const pwflat_forward& F)
-		: t_(F.t, F.t + F.n), f_(F.f, F.f + F.n)
-	{
-		set(n, &t_[0], &f_[0], F._f);
-	}
-	pwflat_forward& operator=(const pwflat_forward& F)
-	{
-		if (this != &F) {
-			t_ = F.t_;
-			f_ = F.f_;
-		}
-
-		set(n, &t_[0], &f_[0], F._f);
-
-		return *this;
-	}
-	~pwflat_forward()
-	{ }
-};
-
-#if 0
+#ifdef _DEBUG
 
 // construct curve
-static AddInX xai_pwflat_forward_curve(
-	FunctionX(XLL_HANDLEX XLL_UNCALCEDX, _T("?xll_pwflat_forward_curve"), _T("PWFLAT.CURVE"))
+static AddInX xai_pwflat_yield_curve(
+	FunctionX(XLL_HANDLEX XLL_UNCALCEDX, _T("?xll_pwflat_yield_curve"), _T("PWFLAT.YIELD.CURVE"))
 	.Category(CATEGORY)
 	.FunctionHelp(_T("Construct a handle to a yield curve with piecewise flat forwards."))
 	.Documentation(
-		_T("The root finder for the bootstrap algorithm uses <codeInline>Tolerance</codeInline> ")
-		_T("as the absolute tolerance for convergence. ")
 	)
 );
 HANDLEX WINAPI
-xll_pwflat_forward_curve()
+xll_pwflat_yield_curve()
 {
 #pragma XLLEXPORT
-	HANDLEX h(0);
+	HANDLEX yc(0);
 
 	try {
-		handle<fixed_income::pwflat::yield_curve<>> yc = new fixed_income::pwflat::yield_curve<>();
-		h = yc.get();
+		handle<yield_curve<>> h = new yield_curve<>();
+		yc = h.get();
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
+
+		yc = 0;
 	}
 
-	return h;
+	return yc;
 }
+
 
 static AddInX xai_pwflate_forward_add(
 	FunctionX(XLL_HANDLEX, _T("?xll_pwflat_forward_add"), _T("PWFLAT.ADD"))
@@ -89,12 +59,11 @@ xll_pwflat_forward_add(HANDLEX h, xfp* pt, xfp* pc)
 {
 #pragma XLLEXPORT
 	try {
-		handle<fixed_income::pwflat::yield_curve<>> h_(h);
-
 		ensure (size(*pt) == size(*pc));
-		ensure (h_);
+		handle<yield_curve<>> h_;
+		ensure (0 != (h_ = handle<yield_curve<>>(h)));
 
-		h_->add(size(*pt), pt->array, pc->array);
+		h_->add(pt->array, pt->array + size(*pt), pc->array);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -105,10 +74,10 @@ xll_pwflat_forward_add(HANDLEX h, xfp* pt, xfp* pc)
 	return h;
 }
 
-//#endif // _DEBUG
+#endif // _DEBUG
 
-static AddInX xai_pwflat_forward_build(
-	FunctionX(XLL_HANDLEX, _T("?xll_pwflat_forward_build"), _T("PWFLAT.BOOTSTRAP"))
+static AddInX xai_pwflate_forward_build(
+	FunctionX(XLL_HANDLEX, _T("?xll_pwflat_forward_build"), _T("PWFLAT.BUILD"))
 	.Arg(XLL_FPX, _T("Instruments"), _T("is an array of handles to instruments "))
 	.Uncalced()
 	.Category(CATEGORY)
@@ -117,21 +86,18 @@ static AddInX xai_pwflat_forward_build(
 		_T("The <codeInline>Instruments</codeInline>s must have increasing maturites. ")
 		,
 		xml::element()
-		.content(xml::xlink(_T("INSTRUMENT.CASH.DEPOSIT")))
-		.content(xml::xlink(_T("INSTRUMENT.FORWARD.RATE.AGREEMENT")))
-		.content(xml::xlink(_T("INSTRUMENT.INTEREST.RATE.SWAP")))
+		.content(xml::xlink(_T("PWFLAT.ADD")))
 	)
 );
 HANDLEX WINAPI
-xll_pwflat_forward_build(HANDLEX h, xfp* pi)
+xll_pwflat_forward_build(xfp* pi)
 {
 #pragma XLLEXPORT
-	
-	HANDLEX h(0);
+	HANDLEX yc(0);
 
 	try {
-		handle<yield_curve<>> h_(h);
-
+		handle<yield_curve<>> h_ = new yield_curve<>();
+	
 		ensure (h_);
 
 		h_->reset();
@@ -139,11 +105,11 @@ xll_pwflat_forward_build(HANDLEX h, xfp* pi)
 			handle<instrument::fixed_income_instrument> i_(pi->array[i]);
 			ensure (i_);
 			if (i_) {
-				h_->add(i_->size(), i_->time(), i_->cash());
+				h_->add(i_->time(), i_->time() + i_->size(), i_->cash());
 			}
 		}
 
-		h = h_.get();
+		yc = h_.get();
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -151,19 +117,14 @@ xll_pwflat_forward_build(HANDLEX h, xfp* pi)
 		return 0;
 	}
 
-	return h;
+	return yc;
 }
-#endif
 
-static AddInX xai_pwflat_forward_curve(
-	FunctionX(XLL_HANDLEX, _T("?xll_pwflat_forward_curve"), _T("PWFLAT.FORWARD.CURVE"))
-	.Arg(XLL_FPX, _T("Times"), IS_TIMES,
-		_T("={1,2,3}"))
-	.Arg(XLL_FPX, _T("Rates"), IS_RATES,
-		_T("={.1,.2,.3}"))
-	.Arg(XLL_DOUBLEX, _T("Extrapolate"), _T("is an optional rate for extrapolating the curve"),
-		.4)
-	.Uncalced()
+static AddInX xai_pwflate_forward_pv(
+	FunctionX(XLL_HANDLEX, _T("?xll_pwflat_forward_pv"), _T("PWFLAT.PV"))
+	.Arg(XLL_HANDLEX, _T("Handle"), _T("is a handle to a piecewise flat forward curve"))
+	.Arg(XLL_FPX, _T("Times"), IS_TIMES)
+	.Arg(XLL_FPX, _T("Amounts"), IS_AMOUNTS)
 	.Category(CATEGORY)
 	.FunctionHelp(_T("Calculate the present value of CashFlows."))
 	.Documentation(
@@ -171,29 +132,29 @@ static AddInX xai_pwflat_forward_curve(
 	)
 );
 HANDLEX WINAPI
-xll_pwflat_forward_curve(xfp* pt, xfp* pf, double _f)
+xll_pwflat_forward_pv(HANDLEX h, xfp* pt, xfp* pc)
 {
 #pragma XLLEXPORT
-	HANDLEX h(0);
+	double pv(std::numeric_limits<double>::quiet_NaN());
 
 	try {
-		ensure (size(*pt) == size(*pf));
+		handle<yield_curve<>> h_(h);
 
-		handle<forward_curve<>> f = new pwflat_forward(size(*pt), pt->array, pf->array, _f);
-		ensure (f);
+		ensure (size(*pt) == size(*pc));
+		ensure (h_);
 
-		h = f.get();
+		pv = h_->forward().pv(pt->array, pt->array + size(*pt), pc->array);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
 	}
 
-	return h;
+	return pv;
 }
 
-static AddInX xai_pwflat_forward_value(
+static AddInX xai_pwflat_forward(
 	FunctionX(XLL_FPX, _T("?xll_pwflat_forward"), _T("PWFLAT.FORWARD"))
-	.Arg(XLL_HANDLEX, _T("Handle"), _T("is a handle to a piecewise flat forward curve."))
+	.Arg(XLL_HANDLEX, _T("Handle"), _T("is a handle to a piecewise flat yield curve."))
 	.Arg(XLL_FPX, _T("Times"), _T("is an array of times in years "))
 	.Category(CATEGORY)
 	.FunctionHelp(_T("Return the instantaneous forward rate at Times in years."))
@@ -211,11 +172,12 @@ xll_pwflat_forward(HANDLEX h, xfp* pt)
 {
 #pragma XLLEXPORT
 	try {
-		handle<forward_curve<>> h_(h);
+		handle<yield_curve<>> h_(h);
+
 		ensure (h_);
 
 		for (xword i = 0; i < size(*pt); ++i)
-			pt->array[i] = h_->value(pt->array[i]);
+			pt->array[i] = h_->forward()(pt->array[i]);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -246,11 +208,12 @@ xll_pwflat_spot(HANDLEX h, xfp* pt)
 {
 #pragma XLLEXPORT
 	try {
-		handle<forward_curve<>> h_(h);
+		handle<yield_curve<>> h_(h);
+
 		ensure (h_);
 
 		for (xword i = 0; i < size(*pt); ++i)
-			pt->array[i] = spot(pt->array[i], *h_);
+			pt->array[i] = h_->forward().spot(pt->array[i]);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -266,7 +229,7 @@ static AddInX xai_pwflat_discount(
 	.Arg(XLL_HANDLEX, _T("Handle"), _T("is a handle to a piecewise flat yield curve"))
 	.Arg(XLL_FPX, _T("Times"), _T("is an array of times in years "))
 	.Category(CATEGORY)
-	.FunctionHelp(_T("Return the discount rate at Times in years."))
+	.FunctionHelp(_T("Return the instantaneous discount rate at Times in years."))
 	.Documentation(
 		_T("The discount, <math>D</math>(<math>t</math>), is the value of a zero coupon bond paying amount 1 at time <math>t</math>. ")
 		_T("It  is related to the instantaneous forward, <math>f</math>, by <math>D</math>(<math>t</math>) = exp(")
@@ -284,11 +247,12 @@ xll_pwflat_discount(HANDLEX h, xfp* pt)
 {
 #pragma XLLEXPORT
 	try {
-		handle<forward_curve<>> h_(h);
+		handle<yield_curve<>> h_(h);
+
 		ensure (h_);
 
 		for (xword i = 0; i < size(*pt); ++i)
-			pt->array[i] = discount(pt->array[i], *h_);
+			pt->array[i] = h_->forward().discount(pt->array[i]);
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());
@@ -305,14 +269,30 @@ int
 test_pwflat(void)
 {
 	try {
-		OPERX oF = ExcelX(xlfEvaluate, OPERX(_T("=PWFLAT.FORWARD.CURVE({1,2,3},{.1,.2,.3})")));
-		ensure (ExcelX(xlUDF, OPERX(_T("PWFLAT.FORWARD")), oF, OPERX(1)) == .1); 
-		ensure (ExcelX(xlUDF, OPERX(_T("PWFLAT.FORWARD")), oF, OPERX(2)) == .2); 
-		ensure (ExcelX(xlUDF, OPERX(_T("PWFLAT.FORWARD")), oF, OPERX(3)) == .3); 
-		ensure (ExcelX(xlUDF, OPERX(_T("PWFLAT.FORWARD")), oF, OPERX(4)) == 0.); 
+		yield_curve<> yc; 
+		double f = 0.04;
+		// pv of (0, -1), (1, e), ..., (n, 1+e) is 0 for f(t) = f.
+		double e = exp(f) - 1;
+		double t[10], c[10];
 
-		ensure (ExcelX(xlUDF, OPERX(_T("PWFLAT.SPOT")), oF, OPERX(2.5))); 
-		ensure (ExcelX(xlUDF, OPERX(_T("PWFLAT.DISCOUNT")), oF, OPERX(2.5))); 
+		t[0] = 0;
+		c[0] = -1;
+		t[1] = 1;
+		c[1] = 1 + e;
+		yc.add(t, t + 2, c);
+		for (int i = 2; i < 10; ++i ) {
+			c[i - 1] -= 1;
+			t[i] = i;
+			c[i] = 1 + e;
+			yc.add(t, t + i + 1, c, 1e-13);
+		}
+
+		for (double u = 0; u < 9; u += 0.01) {
+			ensure (fabs(yc.forward()(u) - f) < 2e-16);
+			ensure (fabs(yc.forward()(u) - yc.forward().spot(u)) < 2e-16);
+			ensure (fabs(yc.forward().discount(u) - exp(-u*yc.forward().spot(u))) < 2e-16);
+		}
+
 	}
 	catch (const std::exception& ex) {
 		XLL_ERROR(ex.what());

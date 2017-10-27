@@ -10,45 +10,8 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\xlldatetime\calendar.h" />
-    <ClInclude Include="..\xlldatetime\cmegroup.h" />
-    <ClInclude Include="..\xlldatetime\datetime.h" />
-    <ClInclude Include="..\xlldatetime\dt.h" />
-    <ClInclude Include="..\xlldatetime\holiday.h" />
-    <ClInclude Include="xllpwflat.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\xllarray\array.cpp" />
-    <ClCompile Include="..\xllarray\empty.cpp" />
-    <ClCompile Include="..\xllarray\getset.cpp" />
-    <ClCompile Include="..\xllarray\interval.cpp" />
-    <ClCompile Include="..\xllarray\mask.cpp" />
-    <ClCompile Include="..\xllarray\member.cpp" />
-    <ClCompile Include="..\xllarray\splice.cpp" />
-    <ClCompile Include="..\xllarray\where.cpp" />
-    <ClCompile Include="..\xllarray\zot.cpp" />
-    <ClCompile Include="..\xlldatetime\calendar.cpp" />
-    <ClCompile Include="..\xlldatetime\cmegroup.cpp" />
-    <ClCompile Include="..\xlldatetime\datetime.cpp" />
-    <ClCompile Include="..\xlldatetime\date_adjust.cpp" />
-    <ClCompile Include="..\xlldatetime\date_date.cpp" />
-    <ClCompile Include="..\xlldatetime\date_dcf.cpp" />
-    <ClCompile Include="..\xlldatetime\date_enum.cpp" />
-    <ClCompile Include="..\xllutility\depends.cpp" />
-    <ClCompile Include="..\xllutility\evaluate.cpp" />
-    <ClCompile Include="..\xllutility\utility.cpp" />
-    <ClCompile Include="cash_deposit.cpp" />
-    <ClCompile Include="eurodollar_futures.cpp" />
-    <ClCompile Include="forward_rate_agreement.cpp" />
-    <ClCompile Include="instrument.cpp" />
-    <ClCompile Include="instrument_bbg.cpp" />
-    <ClCompile Include="interest_rate_swap.cpp" />
-    <ClCompile Include="pwflat.cpp" />
-    <ClCompile Include="pwflat_forward.cpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{CAFB40F1-3568-49CC-BFD7-13E6EA464EF7}</ProjectGuid>
+    <ProjectGuid>{58B2802B-6D9B-4180-93A4-B4C7999001DF}</ProjectGuid>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -73,21 +36,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetExt>.xll</TargetExt>
     <LinkIncremental>true</LinkIncremental>
-    <TargetName>pwflat</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetExt>.xll</TargetExt>
-    <TargetName>pwflat</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\xlldatetime;$(ProgramFiles)\KALX\xll;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProgramFiles)\KALX\xll\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <AdditionalOptions> /J</AdditionalOptions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -105,14 +66,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\xlldatetime;$(ProgramFiles)\KALX\xll;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProgramFiles)\KALX\xll\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <AdditionalOptions> /J</AdditionalOptions>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
-      <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
@@ -125,10 +86,16 @@
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>$(ProgramFiles)\KALX\xll\10\Release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Program Files\KALX\xll\10\Release\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>xll.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="ho_lee.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ho_lee.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

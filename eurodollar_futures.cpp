@@ -9,7 +9,7 @@ using namespace xll;
 using namespace xml;
 
 static AddInX xai_eurodollar_futures(
-	FunctionX(XLL_HANDLEX XLL_UNCALCEDX, _T("?xll_eurodollar_futures"), _T("INSTRUMENT.EURODOLLAR.FUTURES"))
+	FunctionX(XLL_HANDLEX XLL_UNCALCEDX, _T("?xll_eurodollar_futures"), _T("EURODOLLAR.FUTURES"))
 	.Arg(XLL_WORDX,   _T("Nth"), _T("is the position of the contract "))
 	.Category(CATEGORY)
 	.FunctionHelp(_T("Returns a handle to an Eurodollar futures."))
