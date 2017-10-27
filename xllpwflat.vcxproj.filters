@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{9ac60e04-d89f-42bb-a3b8-e756a0d678f5}</UniqueIdentifier>
+      <Extensions>cpp</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{45c24f23-16e3-4a45-8c4b-0bc07329838f}</UniqueIdentifier>
+      <Extensions>h</Extensions>
+    </Filter>
+    <Filter Include="datetime">
+      <UniqueIdentifier>{12ec7197-53e8-4c26-8085-b51b85739371}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="array">
+      <UniqueIdentifier>{40c461e7-ca73-43de-90d3-4c4e5edaafdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utility">
+      <UniqueIdentifier>{de458458-90b8-4eec-8785-a746e224a092}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="adjust">
+      <UniqueIdentifier>{c0d56fd1-b27c-4f39-9040-23ccae6fa889}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="xllpwflat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmsdatetime\calendar.h">
+      <Filter>datetime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmsdatetime\cmegroup.h">
+      <Filter>datetime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmsdatetime\datetime.h">
+      <Filter>datetime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmsdatetime\dt.h">
+      <Filter>datetime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\fmsdatetime\holiday.h">
+      <Filter>datetime</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xllutility\document.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pwflat_forward.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pwflat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cash_deposit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xlldatetime\datetime.cpp">
+      <Filter>datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="forward_rate_agreement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="instrument.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="interest_rate_swap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="eurodollar_futures.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xlldatetime\calendar.cpp">
+      <Filter>datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xlldatetime\cmegroup.cpp">
+      <Filter>datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xlldatetime\date_adjust.cpp">
+      <Filter>datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xlldatetime\date_date.cpp">
+      <Filter>datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xlldatetime\date_dcf.cpp">
+      <Filter>datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xlldatetime\date_enum.cpp">
+      <Filter>datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="instrument_bbg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xllarray\mask.cpp">
+      <Filter>array</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xlldatetime\schedule.cpp">
+      <Filter>datetime</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xllutility\document.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xllutility\addin.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\monte\adjust.cpp">
+      <Filter>adjust</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
